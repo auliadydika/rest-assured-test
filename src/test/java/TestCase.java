@@ -1,3 +1,4 @@
+import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.testng.Assert;
@@ -5,6 +6,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.*;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 public class TestCase {
     @BeforeClass
@@ -54,9 +56,22 @@ public class TestCase {
         JsonPath js = new JsonPath(res.asString());
 
         String size = js.getString("size()");
-        //        String name = js.getString("name");
+
         System.out.println("Amount of data returned: "+size);
-//        System.out.println(name);
+
         Assert.assertEquals(size,numberOfData);
+    }
+    @Test(priority = 4)
+    public void validator() {
+        Response res = given().when().get("/beers/");
+
+        JsonPath js = new JsonPath(res.asString());
+
+        String size = js.getString("size()");
+        String name = js.getString("name");
+
+        Assert.assertEquals(size,"25");
+        System.out.println(name);
+        res.then().assertThat().body(matchesJsonSchemaInClasspath("schema.json"));
     }
 }
